@@ -11,13 +11,40 @@ exports.getAllBootcamps = asyncHandler(async (req, res, next) => {
 });
 
 exports.createNewBootcamp = asyncHandler(async (req, res, next) => {
-  res.send("Create new bootcamp route");
+  const bootcamp = await Bootcamp.create(req.body);
+  res.status(201).json({
+    success: true,
+    data: bootcamp,
+  });
 });
 
 exports.updateBootcampById = asyncHandler(async (req, res, next) => {
-  res.send("Update a bootcamp by id route");
+  let bootcamp = await Bootcamp.findById(req.params.id);
+  if (!bootcamp) {
+    return next(
+      new ErrorResponse(`Bootcamp with id ${req.params.id} was not found`, 404)
+    );
+  }
+  bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  res.status(201).json({
+    success: true,
+    data: bootcamp,
+  });
 });
 
 exports.deleteBootcampById = asyncHandler(async (req, res, next) => {
-  res.send("Delete a bootcamp by id route");
+  let bootcamp = await Bootcamp.findById(req.params.id);
+  if (!bootcamp) {
+    return next(
+      new ErrorResponse(`Bootcamp with id ${req.params.id} was not found`, 404)
+    );
+  }
+  await bootcamp.remove();
+  res.status(200).json({
+    success: true,
+    data: {},
+  });
 });
