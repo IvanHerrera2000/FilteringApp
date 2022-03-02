@@ -3,7 +3,23 @@ const asyncHandler = require("../middleware/asyncHandler");
 const ErrorResponse = require("../utils/errorResponse");
 
 exports.getAllBootcamps = asyncHandler(async (req, res, next) => {
-  const bootcamps = await Bootcamp.find();
+  let query;
+
+  const reqQuery = { ...req.query };
+
+  const removeFields = ["sort"];
+
+  removeFields.forEach((val) => delete reqQuery[val]);
+
+  let queryStr = JSON.stringify(reqQuery);
+
+  queryStr = queryStr.replace(
+    /\b(gt|gte|lt|lte|in)\b/g,
+    (match) => `$${match}`
+  );
+
+  const bootcamps = await Bootcamp.find(JSON.parse(queryStr));
+
   res.status(200).json({
     success: true,
     data: bootcamps,
