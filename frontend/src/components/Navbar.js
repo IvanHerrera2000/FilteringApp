@@ -1,6 +1,5 @@
 import React from "react";
-import { AppBar, Toolbar, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { AppBar, Toolbar, Typography, makeStyles } from "@material-ui/core";
 import { Link } from "react-router-dom";
 
 const useStyles = makeStyles({
@@ -19,7 +18,7 @@ const useStyles = makeStyles({
 function Navbar() {
   const classes = useStyles();
   return (
-    <AppBar>
+    <AppBar position="static">
       <Toolbar className={classes.navigation}>
         <Typography variant="h5">
           <Link to="/" className={classes.link}>
