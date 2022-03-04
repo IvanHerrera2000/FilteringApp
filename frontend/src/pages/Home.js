@@ -74,6 +74,62 @@ function Home() {
 
   return (
     <Container className={classes.root}>
+      {/* Filtering and Sorting Section */}
+      <Paper className={classes.paper}>
+        <Grid container>
+          <Grid item xs={12} sm={6}>
+            <Typography gutterBottom>Filters</Typography>
+
+            <div className={classes.filters}>
+              <Slider min={0} max={100} />
+
+              <div className={classes.priceRangeInputs}>
+                <TextField
+                  size="small"
+                  id="lower"
+                  label="Min Price"
+                  variant="outlined"
+                  type="number"
+                  disabled={loading}
+                  value={0}
+                />
+
+                <TextField
+                  size="small"
+                  id="upper"
+                  label="Max Price"
+                  variant="outlined"
+                  type="number"
+                  disabled={loading}
+                  value={75}
+                />
+              </div>
+            </div>
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <Typography gutterBottom>Sort By</Typography>
+
+            <FormControl component="fieldset" className={classes.filters}>
+              <RadioGroup aria-label="price-order" name="price-order">
+                <FormControlLabel
+                  disabled={loading}
+                  control={<Radio />}
+                  label="Price: Highest - Lowest"
+                />
+
+                <FormControlLabel
+                  disabled={loading}
+                  control={<Radio />}
+                  label="Price: Lowest - Highest"
+                />
+              </RadioGroup>
+            </FormControl>
+          </Grid>
+        </Grid>
+      </Paper>
+
+      {/* Bootcamps cards */}
       <Grid container spacing={2} className={classes.grid}>
         {loading ? (
           <div className={classes.loader}>
