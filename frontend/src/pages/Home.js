@@ -15,6 +15,7 @@ import {
   TextField,
   Typography,
 } from "@material-ui/core";
+import { useNavigate, useLocation } from "react-router-dom";
 import BootcampCard from "../components/BootcampCard";
 
 const useStyles = makeStyles({
@@ -45,10 +46,20 @@ const useStyles = makeStyles({
 });
 
 function Home() {
+  // MAterial UI Styles
+  const classes = useStyles();
+  const history = useNavigate();
+  const location = useLocation();
+
+  const params = location.search ? location.search : null;
+
   const [bootcamps, setBootcamps] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const classes = useStyles();
+  const [sliderMax, setSliderMax] = useState(1000);
+  const [priceRange, setPriceRange] = useState([25, 75]);
+
+  const [filter, setFilter] = useState("");
 
   useEffect(() => {
     let cancel;
@@ -56,9 +67,17 @@ function Home() {
     const fetchData = async () => {
       setLoading(true);
       try {
+        let query;
+
+        if (params && !filter) {
+          query = params;
+        } else {
+          query = filter;
+        }
+
         const { data } = await axios({
           method: "GET",
-          url: `/api/v1/bootcamps`,
+          url: `/api/v1/bootcamps${query}`,
           cancelToken: new axios.CancelToken((c) => (cancel = c)),
         });
 
@@ -70,7 +89,21 @@ function Home() {
     };
 
     fetchData();
-  }, []);
+
+    return () => cancel();
+  }, [filter, params]);
+
+  const buildRangeFilter = (newValue) => {
+    const urlFilter = `?price[gte]=${newValue[0]}&price[lte]=${newValue[1]}`;
+
+    setFilter(urlFilter);
+
+    history.push(urlFilter);
+  };
+
+  const onSliderCommitHandler = (e, newValue) => {
+    buildRangeFilter(newValue);
+  };
 
   return (
     <Container className={classes.root}>
@@ -81,7 +114,14 @@ function Home() {
             <Typography gutterBottom>Filters</Typography>
 
             <div className={classes.filters}>
-              <Slider min={0} max={100} />
+              <Slider
+                min={0}
+                max={sliderMax}
+                value={priceRange}
+                valueLabelDisplay="auto"
+                onChange={(e, newValue) => setPriceRange(newValue)}
+                onChangeCommitted={onSliderCommitHandler}
+              />
 
               <div className={classes.priceRangeInputs}>
                 <TextField
