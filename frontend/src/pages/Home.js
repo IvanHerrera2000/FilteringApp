@@ -84,6 +84,7 @@ function Home() {
         setBootcamps(data.data);
         setLoading(false);
       } catch (error) {
+        if (axios.isCancel(error)) return;
         console.log(error.response.data);
       }
     };
@@ -93,16 +94,38 @@ function Home() {
     return () => cancel();
   }, [filter, params]);
 
+  const handlePriceInputChange = (e, type) => {
+    let newRange;
+
+    if (type === "lower") {
+      newRange = [...priceRange];
+      newRange[0] = Number(e.target.value);
+
+      setPriceRange(newRange);
+    }
+
+    if (type === "upper") {
+      newRange = [...priceRange];
+      newRange[1] = Number(e.target.value);
+
+      setPriceRange(newRange);
+    }
+  };
+
+  const onSliderCommitHandler = (e, newValue) => {
+    buildRangeFilter(newValue);
+  };
+
+  const onTextfieldCommitHandler = () => {
+    buildRangeFilter(priceRange);
+  };
+
   const buildRangeFilter = (newValue) => {
     const urlFilter = `?price[gte]=${newValue[0]}&price[lte]=${newValue[1]}`;
 
     setFilter(urlFilter);
 
-    history.push(urlFilter);
-  };
-
-  const onSliderCommitHandler = (e, newValue) => {
-    buildRangeFilter(newValue);
+    history(urlFilter, { replace: true });
   };
 
   return (
@@ -131,7 +154,9 @@ function Home() {
                   variant="outlined"
                   type="number"
                   disabled={loading}
-                  value={0}
+                  value={priceRange[0]}
+                  onChange={(e) => handlePriceInputChange(e, "lower")}
+                  onBlur={onTextfieldCommitHandler}
                 />
 
                 <TextField
@@ -141,7 +166,9 @@ function Home() {
                   variant="outlined"
                   type="number"
                   disabled={loading}
-                  value={75}
+                  value={priceRange[1]}
+                  onChange={(e) => handlePriceInputChange(e, "upper")}
+                  onBlur={onTextfieldCommitHandler}
                 />
               </div>
             </div>
