@@ -164,6 +164,13 @@ function Home() {
     }
   };
 
+  const clearAllFilters = () => {
+    setFilter("");
+    setSorting("");
+    setPriceRange([0, sliderMax]);
+    history("/", { replace: true });
+  };
+
   return (
     <Container className={classes.root}>
       {/* Filtering and Sorting Section */}
@@ -237,6 +244,9 @@ function Home() {
             </FormControl>
           </Grid>
         </Grid>
+        <Button size="small" color="primary" onClick={clearAllFilters}>
+          Clear All
+        </Button>
       </Paper>
 
       {/* Bootcamps cards */}
