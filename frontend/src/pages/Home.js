@@ -46,20 +46,37 @@ const useStyles = makeStyles({
 });
 
 function Home() {
-  // MAterial UI Styles
+  // Material UI Styles
   const classes = useStyles();
   const history = useNavigate();
   const location = useLocation();
 
   const params = location.search ? location.search : null;
-
+  // Component State
   const [bootcamps, setBootcamps] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [sliderMax, setSliderMax] = useState(1000);
   const [priceRange, setPriceRange] = useState([25, 75]);
+  const [priceOrder, setPriceOrder] = useState("descending");
 
   const [filter, setFilter] = useState("");
+  const [sorting, setSorting] = useState("");
+
+  const upateUIValues = (uiValues) => {
+    setSliderMax(uiValues.maxPrice);
+
+    if (uiValues.filtering.price) {
+      let priceFilter = uiValues.filtering.price;
+
+      setPriceRange([Number(priceFilter.gte), Number(priceFilter.lte)]);
+    }
+
+    if (uiValues.sorting.price) {
+      let priceSort = uiValues.sorting.price;
+      setPriceOrder(priceSort);
+    }
+  };
 
   useEffect(() => {
     let cancel;
@@ -75,6 +92,14 @@ function Home() {
           query = filter;
         }
 
+        if (sorting) {
+          if (query.length === 0) {
+            query = `?sort=${sorting}`;
+          } else {
+            query = query + "&sort=" + sorting;
+          }
+        }
+
         const { data } = await axios({
           method: "GET",
           url: `/api/v1/bootcamps${query}`,
@@ -83,6 +108,7 @@ function Home() {
 
         setBootcamps(data.data);
         setLoading(false);
+        upateUIValues(data.uiValues);
       } catch (error) {
         if (axios.isCancel(error)) return;
         console.log(error.response.data);
@@ -92,7 +118,7 @@ function Home() {
     fetchData();
 
     return () => cancel();
-  }, [filter, params]);
+  }, [filter, params, sorting]);
 
   const handlePriceInputChange = (e, type) => {
     let newRange;
@@ -126,6 +152,16 @@ function Home() {
     setFilter(urlFilter);
 
     history(urlFilter, { replace: true });
+  };
+
+  const handleSortChange = (e) => {
+    setPriceOrder(e.target.value);
+
+    if (e.target.value === "ascending") {
+      setSorting("price");
+    } else if (e.target.value === "descending") {
+      setSorting("-price");
+    }
   };
 
   return (
@@ -178,14 +214,21 @@ function Home() {
             <Typography gutterBottom>Sort By</Typography>
 
             <FormControl component="fieldset" className={classes.filters}>
-              <RadioGroup aria-label="price-order" name="price-order">
+              <RadioGroup
+                aria-label="price-order"
+                name="price-order"
+                value={priceOrder}
+                onChange={handleSortChange}
+              >
                 <FormControlLabel
+                  value="descending"
                   disabled={loading}
                   control={<Radio />}
                   label="Price: Highest - Lowest"
                 />
 
                 <FormControlLabel
+                  value="ascending"
                   disabled={loading}
                   control={<Radio />}
                   label="Price: Lowest - Highest"
